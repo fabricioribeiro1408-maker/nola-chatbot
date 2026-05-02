@@ -31,7 +31,6 @@
 - [Base de Conhecimento](#base-de-conhecimento)
 - [System Prompt (IA)](#system-prompt-ia)
 - [Landing Page](#landing-page)
-- [Estrutura de Arquivos](#estrutura-de-arquivos)
 - [Como Reproduzir](#como-reproduzir)
 - [Decisoes Tecnicas](#decisoes-tecnicas)
 - [Melhorias Futuras](#melhorias-futuras)
@@ -329,21 +328,6 @@ Font Awesome: 6.5.1
 
 ---
 
-## Estrutura de Arquivos
-
-```
-case-nola/
-|
-|-- index.html                    # Landing page completa (HTML+CSS+JS)
-|-- README.md                     # Este arquivo
-|-- base-conhecimento-nola.csv    # 60 FAQs para importar no Google Sheets
-|-- super-prompt-nola.md          # Prompt otimizado do AI Agent (v2)
-|-- system-prompt-nola.md         # Prompt original (v1, substituido)
-|-- TESTES-CHATBOT-NOLA.md        # Roteiro de 17 testes + resultados
-|-- GUIA-COMPLETO-CASE-NOLA.md    # Guia passo-a-passo de montagem
-```
-
----
 
 ## Como Reproduzir
 

@@ -1,0 +1,1831 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nola — Gestao Inteligente para Restaurantes</title>
+  <link rel="icon" href="https://usenola.com.br/2026/assets/images/nola-logo-preto.svg" type="image/svg+xml">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --nola-red: rgb(253, 98, 99);
+      --nola-red-dark: rgb(220, 70, 71);
+      --nola-dark: rgb(29, 41, 57);
+      --nola-dark-light: rgb(45, 60, 80);
+      --white: #ffffff;
+      --gray-50: #f8fafc;
+      --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0;
+      --gray-400: #94a3b8;
+      --gray-600: #475569;
+      --gray-800: #1e293b;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      overflow-x: hidden;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      color: var(--nola-dark);
+      background: var(--white);
+      overflow-x: hidden;
+    }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInLeft {
+      from { opacity: 0; transform: translateX(-40px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes fadeInRight {
+      from { opacity: 0; transform: translateX(40px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.85); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-12px); }
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.9; }
+    }
+    @keyframes slideNumber {
+      from { opacity: 0; transform: translateY(20px) scale(0.5); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes gradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    @keyframes bounceIn {
+      0% { transform: scale(0); opacity: 0; }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes ripple {
+      0% { transform: scale(1); opacity: 0.4; }
+      100% { transform: scale(2.5); opacity: 0; }
+    }
+
+    .animate { opacity: 0; }
+    .animate.visible { animation-fill-mode: forwards; }
+    .animate.fade-up.visible { animation: fadeInUp 0.8s ease forwards; }
+    .animate.fade-left.visible { animation: fadeInLeft 0.8s ease forwards; }
+    .animate.fade-right.visible { animation: fadeInRight 0.8s ease forwards; }
+    .animate.scale-in.visible { animation: scaleIn 0.8s ease forwards; }
+    .animate.bounce-in.visible { animation: bounceIn 0.6s ease forwards; }
+
+    /* ===== NAVBAR ===== */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      padding: 16px 0;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .navbar.scrolled {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 1px 20px rgba(0,0,0,0.08);
+      padding: 10px 0;
+    }
+    .navbar .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .navbar-logo img {
+      height: 36px;
+      transition: transform 0.3s ease;
+    }
+    .navbar-logo:hover img { transform: scale(1.05); }
+    .navbar-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+    .navbar-links a {
+      text-decoration: none;
+      color: var(--nola-dark);
+      font-weight: 500;
+      font-size: 0.9rem;
+      position: relative;
+      transition: color 0.3s ease;
+    }
+    .navbar-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--nola-red);
+      transition: width 0.3s ease;
+    }
+    .navbar-links a:hover { color: var(--nola-red); }
+    .navbar-links a:hover::after { width: 100%; }
+
+    .navbar-cta {
+      background: var(--nola-red);
+      color: var(--white) !important;
+      padding: 10px 24px;
+      border-radius: 50px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(253, 98, 99, 0.3);
+    }
+    .navbar-cta:hover {
+      background: var(--nola-red-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(253, 98, 99, 0.4);
+    }
+    .navbar-cta::after { display: none !important; }
+
+    /* ===== CONTAINER ===== */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ===== HERO ===== */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, var(--white) 0%, var(--gray-50) 50%, #fff5f5 100%);
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, rgba(253,98,99,0.07) 0%, transparent 70%);
+      border-radius: 50%;
+      animation: float 8s ease-in-out infinite;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -30%;
+      left: -10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(29,41,57,0.04) 0%, transparent 70%);
+      border-radius: 50%;
+      animation: float 10s ease-in-out infinite reverse;
+    }
+    .hero .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+      position: relative;
+      z-index: 2;
+      padding-top: 80px;
+    }
+    .hero-content { max-width: 560px; }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(253, 98, 99, 0.08);
+      color: var(--nola-red);
+      padding: 8px 18px;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 24px;
+      animation: fadeInUp 0.6s ease forwards;
+    }
+    .hero-badge i { font-size: 0.75rem; }
+    .hero h1 {
+      font-size: 3.5rem;
+      font-weight: 800;
+      line-height: 1.1;
+      color: var(--nola-dark);
+      margin-bottom: 20px;
+      animation: fadeInUp 0.8s ease 0.1s forwards;
+      opacity: 0;
+    }
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--nola-red), #ff7878);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradient 4s ease infinite;
+    }
+    .hero p {
+      font-size: 1.15rem;
+      color: var(--gray-600);
+      line-height: 1.7;
+      margin-bottom: 36px;
+      animation: fadeInUp 0.8s ease 0.2s forwards;
+      opacity: 0;
+    }
+    .hero-buttons {
+      display: flex;
+      gap: 16px;
+      animation: fadeInUp 0.8s ease 0.3s forwards;
+      opacity: 0;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--nola-red);
+      color: var(--white);
+      padding: 16px 32px;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 20px rgba(253, 98, 99, 0.35);
+      position: relative;
+      overflow: hidden;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      transition: all 0.5s ease;
+      transform: translate(-50%, -50%);
+    }
+    .btn-primary:hover::before { width: 300px; height: 300px; }
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(253, 98, 99, 0.45);
+    }
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: transparent;
+      color: var(--nola-dark);
+      padding: 16px 32px;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 600;
+      text-decoration: none;
+      border: 2px solid var(--gray-200);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    .btn-secondary:hover {
+      border-color: var(--nola-red);
+      color: var(--nola-red);
+      transform: translateY(-3px);
+    }
+
+    /* Hero Visual */
+    .hero-visual {
+      position: relative;
+      animation: fadeInRight 1s ease 0.4s forwards;
+      opacity: 0;
+    }
+    .hero-mockup {
+      background: var(--white);
+      border-radius: 20px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.03);
+      padding: 24px;
+      position: relative;
+      z-index: 2;
+    }
+    .mockup-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .mockup-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    .mockup-dot:nth-child(1) { background: #ff5f57; }
+    .mockup-dot:nth-child(2) { background: #ffbd2e; }
+    .mockup-dot:nth-child(3) { background: #28ca42; }
+    .mockup-bar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .mockup-bar-item {
+      height: 36px;
+      border-radius: 8px;
+      background: var(--gray-100);
+    }
+    .mockup-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      height: 140px;
+      padding: 16px;
+      background: var(--gray-50);
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+    .chart-bar {
+      flex: 1;
+      border-radius: 6px 6px 0 0;
+      transition: height 0.6s ease;
+    }
+    .chart-bar:nth-child(odd) { background: var(--nola-red); }
+    .chart-bar:nth-child(even) { background: rgba(253, 98, 99, 0.3); }
+    .mockup-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+    .stat-card {
+      background: var(--gray-50);
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+    }
+    .stat-card .stat-value {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--nola-dark);
+    }
+    .stat-card .stat-label {
+      font-size: 0.7rem;
+      color: var(--gray-400);
+      margin-top: 2px;
+    }
+
+    /* Floating elements */
+    .floating-card {
+      position: absolute;
+      background: var(--white);
+      border-radius: 14px;
+      padding: 14px 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      z-index: 3;
+      animation: float 5s ease-in-out infinite;
+    }
+    .floating-card.card-1 {
+      top: -10px;
+      right: -20px;
+      animation-delay: 0s;
+    }
+    .floating-card.card-2 {
+      bottom: 40px;
+      left: -30px;
+      animation-delay: 1.5s;
+    }
+    .floating-card i {
+      font-size: 1.2rem;
+      margin-right: 8px;
+    }
+    .floating-card span {
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+    .floating-card .fc-value {
+      color: #28ca42;
+      font-weight: 700;
+    }
+
+    /* ===== SOCIAL PROOF ===== */
+    .social-proof {
+      padding: 40px 0;
+      background: var(--gray-50);
+      border-top: 1px solid var(--gray-100);
+      border-bottom: 1px solid var(--gray-100);
+    }
+    .social-proof .container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 48px;
+      flex-wrap: wrap;
+    }
+    .social-proof-text {
+      font-size: 0.85rem;
+      color: var(--gray-400);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .social-proof-numbers {
+      display: flex;
+      gap: 48px;
+    }
+    .proof-item {
+      text-align: center;
+    }
+    .proof-item .number {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--nola-dark);
+    }
+    .proof-item .label {
+      font-size: 0.8rem;
+      color: var(--gray-400);
+      margin-top: 2px;
+    }
+
+    /* ===== SECTION COMMON ===== */
+    section { padding: 100px 0; }
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--nola-red);
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--nola-dark);
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+    .section-subtitle {
+      font-size: 1.1rem;
+      color: var(--gray-600);
+      max-width: 600px;
+      line-height: 1.7;
+    }
+    .section-header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+    .section-header .section-subtitle { margin: 0 auto; }
+
+    /* ===== FEATURES ===== */
+    .features { background: var(--white); }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .feature-card {
+      background: var(--white);
+      border: 1px solid var(--gray-100);
+      border-radius: 20px;
+      padding: 36px 28px;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--nola-red);
+      transform: scaleX(0);
+      transition: transform 0.4s ease;
+    }
+    .feature-card:hover::before { transform: scaleX(1); }
+    .feature-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+      border-color: transparent;
+    }
+    .feature-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: 20px;
+      transition: transform 0.3s ease;
+    }
+    .feature-card:hover .feature-icon { transform: scale(1.1) rotate(5deg); }
+    .feature-icon.red { background: rgba(253,98,99,0.1); color: var(--nola-red); }
+    .feature-icon.dark { background: rgba(29,41,57,0.08); color: var(--nola-dark); }
+    .feature-icon.green { background: rgba(40,202,66,0.1); color: #28ca42; }
+    .feature-icon.blue { background: rgba(59,130,246,0.1); color: #3b82f6; }
+    .feature-icon.orange { background: rgba(249,115,22,0.1); color: #f97316; }
+    .feature-icon.purple { background: rgba(139,92,246,0.1); color: #8b5cf6; }
+    .feature-card h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--nola-dark);
+    }
+    .feature-card p {
+      font-size: 0.9rem;
+      color: var(--gray-600);
+      line-height: 1.6;
+    }
+
+    /* ===== HOW IT WORKS ===== */
+    .how-it-works {
+      background: var(--nola-dark);
+      color: var(--white);
+      position: relative;
+      overflow: hidden;
+    }
+    .how-it-works::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 20% 50%, rgba(253,98,99,0.08) 0%, transparent 50%);
+    }
+    .how-it-works .section-label { color: rgba(253,98,99,0.8); }
+    .how-it-works .section-title { color: var(--white); }
+    .how-it-works .section-subtitle { color: rgba(255,255,255,0.6); }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 32px;
+      position: relative;
+    }
+    .steps-grid::before {
+      content: '';
+      position: absolute;
+      top: 45px;
+      left: 12%;
+      width: 76%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--nola-red), rgba(253,98,99,0.2));
+    }
+    .step-item {
+      text-align: center;
+      position: relative;
+      z-index: 2;
+    }
+    .step-number {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: var(--nola-red);
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin: 0 auto 20px;
+      box-shadow: 0 4px 20px rgba(253,98,99,0.4);
+      transition: all 0.3s ease;
+    }
+    .step-item:hover .step-number {
+      transform: scale(1.15);
+      box-shadow: 0 6px 30px rgba(253,98,99,0.5);
+    }
+    .step-item h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .step-item p {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.5);
+      line-height: 1.6;
+    }
+
+    /* ===== METRICS COUNTER ===== */
+    .metrics {
+      background: var(--white);
+      position: relative;
+    }
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 32px;
+    }
+    .metric-card {
+      text-align: center;
+      padding: 40px 20px;
+      border-radius: 20px;
+      background: var(--gray-50);
+      border: 1px solid var(--gray-100);
+      transition: all 0.4s ease;
+    }
+    .metric-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.06);
+    }
+    .metric-icon {
+      font-size: 2rem;
+      margin-bottom: 16px;
+    }
+    .metric-number {
+      font-size: 2.8rem;
+      font-weight: 900;
+      color: var(--nola-dark);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .metric-number .counter { display: inline; }
+    .metric-label {
+      font-size: 0.9rem;
+      color: var(--gray-400);
+      font-weight: 500;
+    }
+
+    /* ===== PLANS ===== */
+    .plans { background: var(--gray-50); }
+    .plans-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+    .plan-card {
+      background: var(--white);
+      border-radius: 20px;
+      padding: 32px 24px;
+      border: 1px solid var(--gray-100);
+      transition: all 0.4s ease;
+      position: relative;
+    }
+    .plan-card.featured {
+      border: 2px solid var(--nola-red);
+      transform: scale(1.03);
+    }
+    .plan-card.featured::before {
+      content: 'Mais Popular';
+      position: absolute;
+      top: -14px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--nola-red);
+      color: var(--white);
+      padding: 4px 20px;
+      border-radius: 50px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .plan-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+    }
+    .plan-card.featured:hover { transform: scale(1.03) translateY(-8px); }
+    .plan-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--nola-dark);
+      margin-bottom: 4px;
+    }
+    .plan-target {
+      font-size: 0.8rem;
+      color: var(--gray-400);
+      margin-bottom: 16px;
+    }
+    .plan-price {
+      font-size: 0.85rem;
+      color: var(--gray-600);
+      padding-bottom: 16px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--gray-100);
+    }
+    .plan-features {
+      list-style: none;
+      margin-bottom: 24px;
+    }
+    .plan-features li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: var(--gray-600);
+      margin-bottom: 10px;
+    }
+    .plan-features li i {
+      color: var(--nola-red);
+      margin-top: 3px;
+      font-size: 0.7rem;
+    }
+    .plan-btn {
+      display: block;
+      text-align: center;
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border: none;
+      width: 100%;
+    }
+    .plan-btn.outline {
+      background: transparent;
+      border: 2px solid var(--gray-200);
+      color: var(--nola-dark);
+    }
+    .plan-btn.outline:hover {
+      border-color: var(--nola-red);
+      color: var(--nola-red);
+    }
+    .plan-btn.filled {
+      background: var(--nola-red);
+      color: var(--white);
+      box-shadow: 0 4px 15px rgba(253,98,99,0.3);
+    }
+    .plan-btn.filled:hover {
+      background: var(--nola-red-dark);
+      transform: translateY(-2px);
+    }
+
+    /* ===== TESTIMONIALS ===== */
+    .testimonials { background: var(--white); }
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .testimonial-card {
+      background: var(--gray-50);
+      border-radius: 20px;
+      padding: 32px;
+      transition: all 0.4s ease;
+      border: 1px solid var(--gray-100);
+    }
+    .testimonial-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.06);
+    }
+    .testimonial-stars {
+      color: #fbbf24;
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+    }
+    .testimonial-text {
+      font-size: 0.95rem;
+      color: var(--gray-600);
+      line-height: 1.7;
+      margin-bottom: 20px;
+      font-style: italic;
+    }
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .testimonial-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--nola-red);
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1rem;
+    }
+    .testimonial-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--nola-dark);
+    }
+    .testimonial-role {
+      font-size: 0.8rem;
+      color: var(--gray-400);
+    }
+
+    /* ===== CTA SECTION ===== */
+    .cta-section {
+      background: linear-gradient(135deg, var(--nola-dark) 0%, var(--nola-dark-light) 100%);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(253,98,99,0.15) 0%, transparent 60%);
+      border-radius: 50%;
+    }
+    .cta-section h2 {
+      font-size: 2.8rem;
+      font-weight: 800;
+      color: var(--white);
+      margin-bottom: 16px;
+      position: relative;
+    }
+    .cta-section h2 span {
+      color: var(--nola-red);
+    }
+    .cta-section p {
+      font-size: 1.15rem;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 40px;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+      position: relative;
+    }
+    .cta-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      position: relative;
+    }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      background: var(--nola-dark);
+      color: rgba(255,255,255,0.5);
+      padding: 48px 0 24px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .footer-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .footer-logo img { height: 28px; filter: brightness(0) invert(1); opacity: 0.7; }
+    .footer-links {
+      display: flex;
+      gap: 24px;
+      list-style: none;
+    }
+    .footer-links a {
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: color 0.3s;
+    }
+    .footer-links a:hover { color: var(--nola-red); }
+    .footer-bottom {
+      text-align: center;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      font-size: 0.8rem;
+    }
+
+    /* ===== N8N CHAT OVERRIDES ===== */
+    .n8n-chat .chat-toggle {
+      box-shadow: 0 6px 25px rgba(253, 98, 99, 0.45) !important;
+    }
+    .n8n-chat .chat-toggle:hover {
+      transform: scale(1.1) !important;
+    }
+
+    /* ===== CHAT ATTENTION GRABBER (sempre visivel) ===== */
+    .chat-attention {
+      position: fixed;
+      bottom: 100px;
+      right: 28px;
+      z-index: 10000;
+      pointer-events: none;
+      opacity: 0;
+      animation: attentionFadeIn 0.6s ease 2s forwards;
+    }
+    @keyframes attentionFadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .chat-attention-bubble {
+      background: var(--white);
+      color: var(--nola-dark);
+      padding: 14px 20px;
+      border-radius: 16px 16px 4px 16px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+      font-size: 0.9rem;
+      font-weight: 500;
+      max-width: 240px;
+      position: relative;
+      pointer-events: auto;
+      cursor: pointer;
+      animation: bubbleBounce 3s ease-in-out infinite 2.5s;
+    }
+    @keyframes bubbleBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    .chat-attention-bubble::before {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      right: 24px;
+      width: 0;
+      height: 0;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-top: 10px solid var(--white);
+    }
+    .chat-attention-bubble strong {
+      color: var(--nola-red);
+    }
+
+    /* Badge de notificacao no botao do chat */
+    .chat-notif-badge {
+      position: fixed;
+      bottom: 78px;
+      right: 28px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #28ca42;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10001;
+      border: 3px solid white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      animation: badgePop 0.4s ease 2s both, badgePulse 2s ease-in-out infinite 2.5s;
+      pointer-events: none;
+    }
+    @keyframes badgePop {
+      0% { transform: scale(0); }
+      70% { transform: scale(1.3); }
+      100% { transform: scale(1); }
+    }
+    @keyframes badgePulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+
+    /* Efeito de ondas saindo do botao */
+    .chat-ring {
+      position: fixed;
+      bottom: 40px;
+      right: 40px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      z-index: 9996;
+      pointer-events: none;
+    }
+    .chat-ring::before,
+    .chat-ring::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      border: 2px solid var(--nola-red);
+      animation: ripple 2.5s ease-out infinite;
+    }
+    .chat-ring::after {
+      animation-delay: 1.2s;
+    }
+
+    /* ===== OVERLAY TUTORIAL ===== */
+    .tutorial-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.75);
+      z-index: 99999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.4s ease;
+      cursor: pointer;
+    }
+    .tutorial-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    .tutorial-spotlight {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      z-index: 100000;
+      pointer-events: none;
+      box-shadow: 0 0 0 4px var(--nola-red), 0 0 0 9999px rgba(0,0,0,0.75);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.4s ease;
+    }
+    .tutorial-spotlight.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    .tutorial-tooltip {
+      position: fixed;
+      bottom: 110px;
+      right: 20px;
+      background: var(--white);
+      color: var(--nola-dark);
+      padding: 18px 24px;
+      border-radius: 16px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+      z-index: 100001;
+      max-width: 280px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px);
+      transition: all 0.4s ease 0.2s;
+    }
+    .tutorial-tooltip.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    .tutorial-tooltip::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      right: 30px;
+      width: 0;
+      height: 0;
+      border-left: 12px solid transparent;
+      border-right: 12px solid transparent;
+      border-top: 12px solid var(--white);
+    }
+    .tutorial-tooltip-icon {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+      display: block;
+    }
+    .tutorial-tooltip h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--nola-dark);
+    }
+    .tutorial-tooltip p {
+      font-size: 0.85rem;
+      color: var(--gray-600);
+      line-height: 1.5;
+      margin: 0;
+    }
+    .tutorial-tooltip .tutorial-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 12px;
+      background: var(--nola-red);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 50px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    .tutorial-tooltip .tutorial-cta:hover {
+      background: var(--nola-red-dark);
+      transform: scale(1.05);
+    }
+    .tutorial-dismiss {
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      background: none;
+      border: none;
+      color: var(--gray-400);
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .tutorial-dismiss:hover { color: var(--nola-red); }
+
+    /* ===== MOBILE HAMBURGER ===== */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 4px;
+    }
+    .hamburger span {
+      width: 24px;
+      height: 2px;
+      background: var(--nola-dark);
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1024px) {
+      .hero .container { grid-template-columns: 1fr; text-align: center; }
+      .hero-content { max-width: 100%; }
+      .hero-buttons { justify-content: center; }
+      .hero-visual { display: none; }
+      .hero h1 { font-size: 2.8rem; }
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .steps-grid { grid-template-columns: repeat(2, 1fr); gap: 40px; }
+      .steps-grid::before { display: none; }
+      .plans-grid { grid-template-columns: repeat(2, 1fr); }
+      .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+      .testimonials-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      .hamburger { display: flex; }
+      .navbar-links {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 280px;
+        height: 100vh;
+        background: var(--white);
+        flex-direction: column;
+        padding: 80px 32px 32px;
+        box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+        transition: right 0.3s ease;
+        z-index: 1001;
+      }
+      .navbar-links.open { right: 0; }
+      .navbar-cta { display: none; }
+      .hero h1 { font-size: 2.2rem; }
+      .section-title { font-size: 2rem; }
+      .features-grid { grid-template-columns: 1fr; }
+      .plans-grid { grid-template-columns: 1fr; }
+      .plan-card.featured { transform: none; }
+      .plan-card.featured:hover { transform: translateY(-8px); }
+      .metrics-grid { grid-template-columns: 1fr 1fr; }
+      .cta-section h2 { font-size: 2rem; }
+      .cta-buttons { flex-direction: column; align-items: center; }
+      .chat-container { width: calc(100vw - 24px); right: 12px; bottom: 100px; height: 70vh; }
+      .social-proof-numbers { gap: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar">
+    <div class="container">
+      <a href="#" class="navbar-logo">
+        <img src="https://usenola.com.br/2026/assets/images/nola-logo-preto.svg" alt="Nola">
+      </a>
+      <ul class="navbar-links" id="navLinks">
+        <li><a href="#features">Funcionalidades</a></li>
+        <li><a href="#how-it-works">Como Funciona</a></li>
+        <li><a href="#plans">Planos</a></li>
+        <li><a href="#testimonials">Depoimentos</a></li>
+      </ul>
+      <a href="#" class="navbar-cta" id="navCta" onclick="toggleChat(); return false;">Fale com a Nola</a>
+      <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-badge"><i class="fas fa-bolt"></i> Plataforma #1 para Food Service</div>
+        <h1>Seu restaurante no <span>piloto automatico</span></h1>
+        <p>Gestao integrada de PDV, financeiro, estoque e equipe em um unico ecossistema. Criado por donos de restaurante, para donos de restaurante.</p>
+        <div class="hero-buttons">
+          <a href="#" class="btn-primary" onclick="toggleChat(); return false;">
+            <i class="fas fa-comments"></i> Falar com a Nola
+          </a>
+          <a href="#features" class="btn-secondary">
+            <i class="fas fa-play"></i> Conhecer mais
+          </a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-mockup">
+          <div class="mockup-header">
+            <div class="mockup-dot"></div>
+            <div class="mockup-dot"></div>
+            <div class="mockup-dot"></div>
+          </div>
+          <div class="mockup-bar">
+            <div class="mockup-bar-item" style="flex:2"></div>
+            <div class="mockup-bar-item" style="flex:1"></div>
+            <div class="mockup-bar-item" style="flex:1.5"></div>
+          </div>
+          <div class="mockup-chart" id="mockupChart"></div>
+          <div class="mockup-stats">
+            <div class="stat-card">
+              <div class="stat-value" data-count="847">0</div>
+              <div class="stat-label">Pedidos hoje</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value">R$ <span data-count="42">0</span>k</div>
+              <div class="stat-label">Faturamento</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value"><span data-count="98">0</span>%</div>
+              <div class="stat-label">Satisfacao</div>
+            </div>
+          </div>
+        </div>
+        <div class="floating-card card-1">
+          <i class="fas fa-chart-line" style="color: #28ca42;"></i>
+          <span>Vendas <span class="fc-value">+23%</span></span>
+        </div>
+        <div class="floating-card card-2">
+          <i class="fas fa-check-circle" style="color: var(--nola-red);"></i>
+          <span>Pedido #1247 OK</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOCIAL PROOF -->
+  <div class="social-proof">
+    <div class="container">
+      <span class="social-proof-text">Resultados reais</span>
+      <div class="social-proof-numbers">
+        <div class="proof-item animate fade-up">
+          <div class="number"><span class="counter" data-target="2500">0</span>+</div>
+          <div class="label">Restaurantes ativos</div>
+        </div>
+        <div class="proof-item animate fade-up" style="animation-delay: 0.1s;">
+          <div class="number">R$ <span class="counter" data-target="180">0</span>M</div>
+          <div class="label">Processados/mes</div>
+        </div>
+        <div class="proof-item animate fade-up" style="animation-delay: 0.2s;">
+          <div class="number"><span class="counter" data-target="99">0</span>%</div>
+          <div class="label">Uptime garantido</div>
+        </div>
+        <div class="proof-item animate fade-up" style="animation-delay: 0.3s;">
+          <div class="number"><span class="counter" data-target="4">0</span>.9<i class="fas fa-star" style="color:#fbbf24;font-size:0.9rem;margin-left:4px;"></i></div>
+          <div class="label">Avaliacao media</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <section class="features" id="features">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label"><i class="fas fa-th-large"></i> Modulos</div>
+        <h2 class="section-title animate fade-up">Tudo que seu restaurante<br>precisa em um so lugar</h2>
+        <p class="section-subtitle animate fade-up">Do pedido ao relatorio financeiro — cada modulo foi pensado para resolver dores reais da operacao.</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card animate fade-up">
+          <div class="feature-icon red"><i class="fas fa-cash-register"></i></div>
+          <h3>PDV Inteligente</h3>
+          <p>Frente de caixa rapida e intuitiva, com modos mesa, balcao, delivery e comanda. Funciona offline.</p>
+        </div>
+        <div class="feature-card animate fade-up" style="animation-delay: 0.1s;">
+          <div class="feature-icon dark"><i class="fas fa-chart-pie"></i></div>
+          <h3>Financeiro Completo</h3>
+          <p>DRE automatico, fluxo de caixa, contas a pagar e receber, conciliacao bancaria integrada.</p>
+        </div>
+        <div class="feature-card animate fade-up" style="animation-delay: 0.2s;">
+          <div class="feature-icon green"><i class="fas fa-boxes-stacked"></i></div>
+          <h3>Estoque em Tempo Real</h3>
+          <p>Fichas tecnicas, baixa automatica por venda, alertas de estoque minimo e curva ABC.</p>
+        </div>
+        <div class="feature-card animate fade-up" style="animation-delay: 0.3s;">
+          <div class="feature-icon blue"><i class="fas fa-users-gear"></i></div>
+          <h3>Gestao de Equipe</h3>
+          <p>Controle de turnos, comissoes, metas individuais e permissoes por funcao.</p>
+        </div>
+        <div class="feature-card animate fade-up" style="animation-delay: 0.4s;">
+          <div class="feature-icon orange"><i class="fas fa-truck-fast"></i></div>
+          <h3>Hub de Delivery</h3>
+          <p>iFood, Rappi, Uber Eats e delivery proprio integrados em uma unica tela.</p>
+        </div>
+        <div class="feature-card animate fade-up" style="animation-delay: 0.5s;">
+          <div class="feature-icon purple"><i class="fas fa-brain"></i></div>
+          <h3>Clara IA</h3>
+          <p>Inteligencia artificial que analisa seus dados e sugere acoes para aumentar lucro e reduzir desperdicio.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-it-works" id="how-it-works">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label"><i class="fas fa-route"></i> Jornada</div>
+        <h2 class="section-title animate fade-up">Comece a operar em dias,<br>nao em meses</h2>
+        <p class="section-subtitle animate fade-up">Implantacao guiada com equipe dedicada. Do zero ao go-live em 5 a 10 dias.</p>
+      </div>
+      <div class="steps-grid">
+        <div class="step-item animate fade-up">
+          <div class="step-number">1</div>
+          <h3>Consultoria</h3>
+          <p>Mapeamos sua operacao e personalizamos a plataforma para seu modelo de negocio.</p>
+        </div>
+        <div class="step-item animate fade-up" style="animation-delay: 0.15s;">
+          <div class="step-number">2</div>
+          <h3>Configuracao</h3>
+          <p>Cardapio, fiscal, impressoras, integracoes — tudo configurado pela nossa equipe.</p>
+        </div>
+        <div class="step-item animate fade-up" style="animation-delay: 0.3s;">
+          <div class="step-number">3</div>
+          <h3>Treinamento</h3>
+          <p>Capacitamos sua equipe para usar cada modulo com confianca no dia a dia.</p>
+        </div>
+        <div class="step-item animate fade-up" style="animation-delay: 0.45s;">
+          <div class="step-number">4</div>
+          <h3>Go-Live</h3>
+          <p>Acompanhamento dedicado nos primeiros dias para garantir uma operacao suave.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- METRICS -->
+  <section class="metrics" id="metrics">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label"><i class="fas fa-chart-bar"></i> Impacto</div>
+        <h2 class="section-title animate fade-up">Numeros que falam<br>por si mesmos</h2>
+      </div>
+      <div class="metrics-grid">
+        <div class="metric-card animate scale-in">
+          <div class="metric-icon">&#127860;</div>
+          <div class="metric-number"><span class="counter" data-target="30">0</span>%</div>
+          <div class="metric-label">Reducao de desperdicio</div>
+        </div>
+        <div class="metric-card animate scale-in" style="animation-delay: 0.1s;">
+          <div class="metric-icon">&#9201;</div>
+          <div class="metric-number"><span class="counter" data-target="40">0</span>%</div>
+          <div class="metric-label">Mais agilidade no PDV</div>
+        </div>
+        <div class="metric-card animate scale-in" style="animation-delay: 0.2s;">
+          <div class="metric-icon">&#128200;</div>
+          <div class="metric-number"><span class="counter" data-target="25">0</span>%</div>
+          <div class="metric-label">Aumento no faturamento</div>
+        </div>
+        <div class="metric-card animate scale-in" style="animation-delay: 0.3s;">
+          <div class="metric-icon">&#128640;</div>
+          <div class="metric-number"><span class="counter" data-target="10">0</span> dias</div>
+          <div class="metric-label">Para implantar</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PLANS -->
+  <section class="plans" id="plans">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label"><i class="fas fa-tags"></i> Planos</div>
+        <h2 class="section-title animate fade-up">Um plano para cada fase<br>do seu restaurante</h2>
+        <p class="section-subtitle animate fade-up">Todos os planos incluem 30 dias gratis para teste. Sem fidelidade.</p>
+      </div>
+      <div class="plans-grid">
+        <div class="plan-card animate fade-up">
+          <div class="plan-name">Essencial</div>
+          <div class="plan-target">Ate R$ 80 mil/mes</div>
+          <div class="plan-price">Para operacoes enxutas que precisam do basico bem feito</div>
+          <ul class="plan-features">
+            <li><i class="fas fa-check"></i> PDV completo</li>
+            <li><i class="fas fa-check"></i> Controle financeiro</li>
+            <li><i class="fas fa-check"></i> Gestao de estoque</li>
+            <li><i class="fas fa-check"></i> 1 integracao delivery</li>
+            <li><i class="fas fa-check"></i> Suporte por chat</li>
+          </ul>
+          <button class="plan-btn outline" onclick="toggleChat()">Falar com a Nola</button>
+        </div>
+        <div class="plan-card featured animate fade-up" style="animation-delay: 0.1s;">
+          <div class="plan-name">Profissional</div>
+          <div class="plan-target">R$ 80 mil a R$ 250 mil/mes</div>
+          <div class="plan-price">Para restaurantes em crescimento que querem escalar</div>
+          <ul class="plan-features">
+            <li><i class="fas fa-check"></i> Tudo do Essencial</li>
+            <li><i class="fas fa-check"></i> Multi-integracoes delivery</li>
+            <li><i class="fas fa-check"></i> KDS (Kitchen Display)</li>
+            <li><i class="fas fa-check"></i> Cardapio Digital</li>
+            <li><i class="fas fa-check"></i> Relatorios avancados</li>
+            <li><i class="fas fa-check"></i> Suporte prioritario</li>
+          </ul>
+          <button class="plan-btn filled" onclick="toggleChat()">Comecar agora</button>
+        </div>
+        <div class="plan-card animate fade-up" style="animation-delay: 0.2s;">
+          <div class="plan-name">Premium</div>
+          <div class="plan-target">R$ 250 mil a R$ 600 mil/mes</div>
+          <div class="plan-price">Para operacoes robustas que exigem controle total</div>
+          <ul class="plan-features">
+            <li><i class="fas fa-check"></i> Tudo do Profissional</li>
+            <li><i class="fas fa-check"></i> Clara IA integrada</li>
+            <li><i class="fas fa-check"></i> CRM de clientes</li>
+            <li><i class="fas fa-check"></i> Totem de autoatendimento</li>
+            <li><i class="fas fa-check"></i> Gestor de conta dedicado</li>
+          </ul>
+          <button class="plan-btn outline" onclick="toggleChat()">Falar com a Nola</button>
+        </div>
+        <div class="plan-card animate fade-up" style="animation-delay: 0.3s;">
+          <div class="plan-name">Enterprise</div>
+          <div class="plan-target">Acima de R$ 600 mil/mes</div>
+          <div class="plan-price">Para redes e franquias com gestao multi-unidade</div>
+          <ul class="plan-features">
+            <li><i class="fas fa-check"></i> Tudo do Premium</li>
+            <li><i class="fas fa-check"></i> Multi-lojas centralizado</li>
+            <li><i class="fas fa-check"></i> API aberta</li>
+            <li><i class="fas fa-check"></i> SLA garantido</li>
+            <li><i class="fas fa-check"></i> Implantacao VIP</li>
+          </ul>
+          <button class="plan-btn outline" onclick="toggleChat()">Falar com a Nola</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="testimonials" id="testimonials">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label"><i class="fas fa-heart"></i> Depoimentos</div>
+        <h2 class="section-title animate fade-up">Quem usa, recomenda</h2>
+        <p class="section-subtitle animate fade-up">Restaurantes reais com resultados reais.</p>
+      </div>
+      <div class="testimonials-grid">
+        <div class="testimonial-card animate fade-up">
+          <div class="testimonial-stars">
+            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+          </div>
+          <p class="testimonial-text">"Reduzi 40% do desperdicio em 2 meses. As fichas tecnicas com baixa automatica mudaram completamente meu controle de estoque."</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">RC</div>
+            <div>
+              <div class="testimonial-name">Rafael Costa</div>
+              <div class="testimonial-role">Dono — Burgers & Co (SP)</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card animate fade-up" style="animation-delay: 0.1s;">
+          <div class="testimonial-stars">
+            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+          </div>
+          <p class="testimonial-text">"Antes eu usava 3 sistemas diferentes. Com a Nola tudo esta em um lugar so. O DRE automatico me economiza 2 dias por mes."</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">AM</div>
+            <div>
+              <div class="testimonial-name">Ana Martins</div>
+              <div class="testimonial-role">Gerente — Pizzaria Tradizione (RJ)</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card animate fade-up" style="animation-delay: 0.2s;">
+          <div class="testimonial-stars">
+            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+          </div>
+          <p class="testimonial-text">"A integracao com iFood e Rappi em uma tela so transformou minha dark kitchen. Zero pedido perdido desde que migramos."</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">LS</div>
+            <div>
+              <div class="testimonial-name">Lucas Silva</div>
+              <div class="testimonial-role">Fundador — Cloud Kitchen Lab (BH)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="container">
+      <h2 class="animate fade-up">Pronto para <span>transformar</span><br>sua operacao?</h2>
+      <p class="animate fade-up">Teste 30 dias gratis. Sem cartao. Sem compromisso.</p>
+      <div class="cta-buttons animate fade-up">
+        <a href="#" class="btn-primary" onclick="toggleChat(); return false;" style="font-size:1.1rem; padding: 18px 40px;">
+          <i class="fas fa-comments"></i> Falar com a Nola agora
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <a href="#" class="footer-logo">
+          <img src="https://usenola.com.br/2026/assets/images/nola-logo-preto.svg" alt="Nola">
+        </a>
+        <ul class="footer-links">
+          <li><a href="#features">Funcionalidades</a></li>
+          <li><a href="#plans">Planos</a></li>
+          <li><a href="#testimonials">Depoimentos</a></li>
+          <li><a href="https://usenola.com.br" target="_blank">usenola.com.br</a></li>
+        </ul>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Nola Tecnologia. Todos os direitos reservados. Feito com <i class="fas fa-heart" style="color:var(--nola-red);"></i> por quem entende de restaurante.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- CHAT ATTENTION ELEMENTS (sempre visiveis) -->
+  <div class="chat-ring" id="chatRing"></div>
+  <div class="chat-notif-badge" id="chatBadge">1</div>
+  <div class="chat-attention" id="chatAttention">
+    <div class="chat-attention-bubble" onclick="openChatDirect();">
+      Oi! Sou a <strong>Nola</strong>, posso tirar suas duvidas agora mesmo!
+    </div>
+  </div>
+
+  <!-- TUTORIAL OVERLAY -->
+  <div class="tutorial-overlay" id="tutorialOverlay" onclick="closeTutorial()"></div>
+  <div class="tutorial-spotlight" id="tutorialSpotlight"></div>
+  <div class="tutorial-tooltip" id="tutorialTooltip">
+    <button class="tutorial-dismiss" onclick="closeTutorial()">&times;</button>
+    <span class="tutorial-tooltip-icon"><i class="fas fa-hand-point-down" style="color: var(--nola-red);"></i></span>
+    <h4>Aqui voce inicia o atendimento!</h4>
+    <p>Clique no botao abaixo para conversar com a <strong>Nola</strong>, nossa assistente virtual com IA.</p>
+    <button class="tutorial-cta" onclick="closeTutorialAndOpenChat()">
+      <i class="fas fa-comments"></i> Iniciar conversa
+    </button>
+  </div>
+
+  <!-- N8N CHAT WIDGET -->
+  <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet">
+  <script type="module">
+    import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
+
+    createChat({
+      webhookUrl: 'https://fabricioribeiro1408.app.n8n.cloud/webhook/1a3ff766-77d2-4c47-9bed-951e1ea7889b/chat',
+      mode: 'window',
+      chatInputKey: 'chatInput',
+      chatSessionKey: 'sessionId',
+      showWelcomeScreen: false,
+      initialMessages: [
+        'Ola! Eu sou a Nola, sua assistente virtual. Como posso te ajudar hoje? E qual o seu nome, por favor?'
+      ],
+      i18n: {
+        en: {
+          title: 'Nola - Assistente Virtual',
+          subtitle: 'Tire suas duvidas sobre a plataforma',
+          inputPlaceholder: 'Digite sua mensagem...',
+          getStarted: 'Iniciar conversa',
+          closeButtonTooltip: 'Fechar chat',
+        },
+      },
+      theme: {
+        button: {
+          backgroundColor: 'rgb(253, 98, 99)',
+          hoverBackgroundColor: 'rgb(220, 70, 71)',
+          iconColor: '#ffffff',
+          size: '64',
+          borderRadius: '50%',
+        },
+        chatWindow: {
+          backgroundColor: '#ffffff',
+          borderRadius: '20px',
+          height: '600px',
+          width: '420px',
+        },
+        header: {
+          backgroundColor: 'rgb(253, 98, 99)',
+          textColor: '#ffffff',
+        },
+        messageBot: {
+          backgroundColor: '#f1f5f9',
+          textColor: 'rgb(29, 41, 57)',
+        },
+        messageUser: {
+          backgroundColor: 'rgb(253, 98, 99)',
+          textColor: '#ffffff',
+        },
+        input: {
+          backgroundColor: '#f8fafc',
+          textColor: 'rgb(29, 41, 57)',
+          borderColor: '#e2e8f0',
+        },
+        sendButton: {
+          backgroundColor: 'rgb(253, 98, 99)',
+          hoverBackgroundColor: 'rgb(220, 70, 71)',
+        },
+      },
+    });
+
+    // Esconde/mostra alerta visual conforme chat abre/fecha
+    function watchChatState() {
+      const att = document.getElementById('chatAttention');
+      const badge = document.getElementById('chatBadge');
+      const ring = document.getElementById('chatRing');
+
+      const mo = new MutationObserver(() => {
+        // Chat aberto = existe elemento .n8n-chat .chat-window que esta visivel
+        const chatWindow = document.querySelector('.n8n-chat .chat-window');
+        const isOpen = chatWindow && chatWindow.offsetParent !== null;
+        if (isOpen) {
+          att.style.visibility = 'hidden';
+          att.style.opacity = '0';
+          badge.style.visibility = 'hidden';
+          badge.style.opacity = '0';
+          ring.style.visibility = 'hidden';
+        } else {
+          att.style.visibility = 'visible';
+          att.style.opacity = '1';
+          badge.style.visibility = 'visible';
+          badge.style.opacity = '1';
+          ring.style.visibility = 'visible';
+        }
+      });
+
+      // Observa mudancas no container do n8n-chat
+      const waitForChat = setInterval(() => {
+        const chatEl = document.querySelector('.n8n-chat');
+        if (chatEl) {
+          clearInterval(waitForChat);
+          mo.observe(chatEl, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
+        }
+      }, 500);
+    }
+    watchChatState();
+
+    // Open chat directly (from n8n widget button or bubble)
+    window.openChatDirect = function() {
+      const btn = document.querySelector('.n8n-chat .chat-toggle');
+      if (btn) btn.click();
+    };
+
+    // toggleChat = botoes da pagina -> mostra overlay tutorial
+    window.toggleChat = function() {
+      document.getElementById('tutorialOverlay').classList.add('active');
+      document.getElementById('tutorialSpotlight').classList.add('active');
+      document.getElementById('tutorialTooltip').classList.add('active');
+    };
+
+    // Fecha tutorial overlay
+    window.closeTutorial = function() {
+      document.getElementById('tutorialOverlay').classList.remove('active');
+      document.getElementById('tutorialSpotlight').classList.remove('active');
+      document.getElementById('tutorialTooltip').classList.remove('active');
+    };
+
+    // Fecha tutorial E abre o chat
+    window.closeTutorialAndOpenChat = function() {
+      closeTutorial();
+      setTimeout(() => {
+        const btn = document.querySelector('.n8n-chat .chat-toggle');
+        if (btn) btn.click();
+      }, 300);
+    };
+  </script>
+
+  <script>
+
+    // ===== NAVBAR SCROLL =====
+    let lastScroll = 0;
+    window.addEventListener('scroll', () => {
+      const navbar = document.getElementById('navbar');
+      const scrollY = window.scrollY;
+      navbar.classList.toggle('scrolled', scrollY > 50);
+      lastScroll = scrollY;
+    });
+
+    // ===== MOBILE MENU =====
+    function toggleMenu() {
+      document.getElementById('navLinks').classList.toggle('open');
+    }
+
+    // ===== SCROLL ANIMATIONS =====
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          // Trigger counter if has counter
+          const counters = entry.target.querySelectorAll('.counter');
+          counters.forEach(c => animateCounter(c));
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.animate').forEach(el => observer.observe(el));
+
+    // Also observe counter parents that aren't .animate
+    document.querySelectorAll('.stat-value [data-count]').forEach(el => {
+      const parent = el.closest('.hero-visual');
+      if (parent) {
+        const obs = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              animateStatCounters();
+              obs.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.3 });
+        obs.observe(parent);
+      }
+    });
+
+    // ===== COUNTER ANIMATION =====
+    function animateCounter(el) {
+      if (el.dataset.animated) return;
+      el.dataset.animated = 'true';
+      const target = parseInt(el.dataset.target);
+      const duration = 2000;
+      const start = performance.now();
+
+      function update(now) {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        el.textContent = Math.round(target * eased);
+        if (progress < 1) requestAnimationFrame(update);
+      }
+      requestAnimationFrame(update);
+    }
+
+    function animateStatCounters() {
+      document.querySelectorAll('.stat-value [data-count]').forEach(el => {
+        if (el.dataset.animated) return;
+        el.dataset.animated = 'true';
+        const target = parseInt(el.dataset.count);
+        const duration = 2000;
+        const start = performance.now();
+        function update(now) {
+          const elapsed = now - start;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          el.textContent = Math.round(target * eased);
+          if (progress < 1) requestAnimationFrame(update);
+        }
+        requestAnimationFrame(update);
+      });
+    }
+
+    // ===== MOCKUP CHART =====
+    function buildChart() {
+      const chart = document.getElementById('mockupChart');
+      if (!chart) return;
+      const heights = [45, 65, 35, 80, 55, 90, 70, 50, 85, 60, 95, 75];
+      heights.forEach((h, i) => {
+        const bar = document.createElement('div');
+        bar.className = 'chart-bar';
+        bar.style.height = '0%';
+        chart.appendChild(bar);
+        setTimeout(() => { bar.style.height = h + '%'; }, 300 + i * 80);
+      });
+    }
+    buildChart();
+
+    // ===== SMOOTH SCROLL FOR NAV LINKS =====
+    document.querySelectorAll('a[href^="#"]').forEach(link => {
+      link.addEventListener('click', function(e) {
+        const href = this.getAttribute('href');
+        if (href === '#') return;
+        e.preventDefault();
+        const target = document.querySelector(href);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.getElementById('navLinks').classList.remove('open');
+        }
+      });
+    });
+
+    // ===== PARALLAX-LIKE FLOATING CARDS =====
+    document.addEventListener('mousemove', (e) => {
+      const cards = document.querySelectorAll('.floating-card');
+      const x = (e.clientX / window.innerWidth - 0.5) * 20;
+      const y = (e.clientY / window.innerHeight - 0.5) * 20;
+      cards.forEach((card, i) => {
+        const factor = i === 0 ? 1 : -1;
+        card.style.transform = `translateY(${Math.sin(Date.now()/1000) * 12}px) translate(${x * factor}px, ${y * factor}px)`;
+      });
+    });
+  </script>
+
+</body>
+</html>
